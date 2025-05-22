@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kean University Auto Parts Shop</title>
+    <style>
+        :root {
+            --primary-color: #007BFF;
+            --secondary-color: #f9f9f9;
+            --border-color: #e0e0e0;
+            --text-dark: #333;
+            --text-light: #666;
+            --background: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #f4f6f8;
+            color: var(--text-dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .background-wrapper {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100vh;
+          background-image: url("static/background.jpg");
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+          z-index: -2;
+        }
+
+        .background-fade {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 200px;
+          background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, #f4f6f8 100%);
+          z-index: -1;
+        }
+
+        h1 {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1em 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .products {
+            flex: 2;
+            min-width: 60%;
+            background-color: var(--background);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .cart {
+            flex: 1;
+            min-width: 300px;
+            max-height: 80vh;
+            background-color: var(--secondary-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow-y: auto;
+            position: sticky;
+            top: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li.section {
+            margin-bottom: 10px;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .nested-list {
+            display: none;
+            margin-left: 1em;
+            margin-top: 5px;
+            padding-left: 10px;
+            border-left: 2px solid var(--border-color);
+        }
+
+        .product-card {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            transition: box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .product-card button {
+            margin-top: 8px;
+            padding: 6px 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .product-card button:hover {
+            background-color: #0056b3;
+        }
+
+        #cart-items li {
+            padding: 6px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #cart-items button {
+            margin-top: 5px;
+            padding: 4px 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #cart-items button:hover {
+            background-color: #c82333;
+        }
+
+        #total-price {
+            font-size: 1.2em;
+            color: #000;
+        }
+
+        button.checkout {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button.checkout:hover {
+            background-color: darkgreen;
+        }
+
+        .top-right.user-box {
+          position: absolute;
+          top: 10px;
+          right: 20px;
+          font-size: 0.9em;
+          text-align: right;
+          z-index: 10;
+        }
+
+        .top-right.user-box a,
+        .top-right.user-box button {
+          color: var(--primary-color);
+          text-decoration: none;
+          margin-left: 10px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 0.9em;
+        }
+
+        .top-right.user-box a:hover,
+        .top-right.user-box button:hover {
+          text-decoration: underline;
+        }
+
+        .user-box {
+            background-color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            min-width: 220px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .user-box p {
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+        }
+
+        .user-box a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-right: 12px;
+        }
+
+        .user-box a.logout-link {
+            color: #dc3545;
+        }
+
+        .user-box a:hover {
+            text-decoration: underline;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+        }
+
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .modal-content.orders-box {
+          max-width: 800px;
+          margin: 5% auto;
+          padding: 30px;
+          background: #fff;
+            border: 1px solid #888;
+          border-radius: 10px;
+          overflow-y: auto;
+          max-height: 80vh;
+        }
+
+        .close-btn {
+          float: right;
+          font-size: 24px;
+          cursor: pointer;
+        }
+
+        .order-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .order-card {
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 15px 20px;
+          margin-bottom: 20px;
+          background-color: #f9f9f9;
+        }
+
+        .order-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-weight: bold;
+        }
+
+        .order-status {
+          padding: 4px 10px;
+          border-radius: 5px;
+          font-size: 0.85rem;
+          text-transform: capitalize;
+        }
+
+        .status-paid { background-color: #d4edda; color: #155724; }
+        .status-processed { background-color: #cce5ff; color: #004085; }
+        .status-unpaid { background-color: #fff3cd; color: #856404; }
+
+        .order-products ul {
+          list-style: disc;
+          margin-left: 20px;
+          color: #444;
+        }
+
+        .order-actions {
+          margin-top: 15px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+
+        .payment-form select {
+          padding: 6px 10px;
+          border-radius: 4px;
+          border: 1px solid #ccc;
+        }
+
+        .btn-primary {
+          background-color: #007bff;
+          color: white;
+          padding: 8px 14px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        .btn-primary:hover {
+          background-color: #0056b3;
+        }
+
+        .btn-danger {
+          background-color: #dc3545;
+          color: white;
+          padding: 8px 14px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        .btn-danger:hover {
+          background-color: #c82333;
+        }
+
+        .no-orders {
+          text-align: center;
+          color: #777;
+          margin-top: 30px;
+        }
+
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: #aaa;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+         /* Reset password form */
+          #reset-password-form {
+            display: none; /* hidden by default, toggled with JS */
+            margin-top: 20px;
+          }
+
+          #reset-password-form form {
+            display: flex;
+            flex-direction: column;
+          }
+
+          #reset-password-form label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+          }
+
+          #reset-password-form input[type="password"] {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+          }
+          #reset-password-form input[type="password"]:focus {
+            outline: none;
+            border-color: #007bff;
+          }
+
+          #reset-password-form button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 0;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+          }
+          #reset-password-form button:hover {
+            background-color: #0056b3;
+          }
+
+        .payment-box {
+            background-color: #fff;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+        }
+
+        .payment-box img#qrImage {
+            width: 100%;
+            height: auto;
+        }
+
+
+        .action-links {
+            display: flex;
+          gap: 20px;
+          justify-content: flex-start;
+          margin: 25px 0 15px 0;
+        }
+        .action-links a {
+            color: #007bff;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .action-links a:hover {
+            background-color: #e6f0ff;
+        }
+
+        .user-action-group {
+          display: flex;
+          gap: 12px;
+          margin-top: 10px;
+        }
+
+        .user-action-group button,
+        .user-action-group .btn-link {
+          padding: 8px 16px;
+          border: none;
+          border-radius: 6px;
+          background-color: #007bff;
+          color: white;
+          font-weight: 600;
+          text-decoration: none;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+
+        .user-action-group button:hover,
+        .user-action-group .btn-link:hover {
+          background-color: #0056b3;
+        }
+
+        .user-action-group .btn-link {
+            display: inline-block;
+        }
+
+        .header-container {
+          position: relative;
+        }
+
+        .header-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1em 0;
+            margin: 0;
+            justify-content: center; /* center all content */
+            position: relative;
+        }
+
+        .header-bar .logo {
+            position: absolute;
+            left: 5em;
+            height: 120px; /* adjust as needed */
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <div class="background-wrapper">
+        <div class="background-fade"></div>
+    </div>
+    <div class="header-container">
+      <div class="top-right user-box">
+        {% if session.username %}
+          <p><strong>Welcome,</strong> {{ session.username }}!</p>
+          <div class="user-action-group">
+            <button onclick="toggleProfileModal()">View Profile</button>
+            <button id="viewOrdersBtn">View Orders</button>
+            <a href="{{ url_for('logout') }}" class="btn-link">Logout</a>
+          </div>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn-link">Login</a>
+        {% endif %}
+      </div>
+
+      <div class="header-bar">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+        <h1>Kean University Auto Parts Shop</h1>
+      </div>
+    </div>
+
+
+    <div class="container">
+        <div class="products">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Products</h2>
+                <div style="position: relative; max-width: 300px; flex-grow: 1;">
+                    <input type="text" id="productSearch" placeholder="Search products..."
+                           onkeyup="filterProducts()"
+                           style="width: 50%; padding: 8px 12px 8px 36px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;">
+                    <span style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: #888;">🔍</span>
+                </div>
+            </div>
+            <ul>
+                {% for brand, models in grouped_products.items() %}
+                    <li class="section">
+                        <button class="toggle-btn" onclick="toggleList(this)">
+                            <span class="arrow">▶</span> <span class="brand-name">{{ brand }}</span>
+                        </button>
+                        <ul class="nested-list">
+                            {% for model, products in models.items() %}
+                                <li class="section">
+                                    <button class="toggle-btn" onclick="toggleList(this)">
+                                        <span class="arrow">▶</span> <span class="model-name">{{ model }}</span>
+                                    </button>
+                                    <ul class="nested-list">
+                                       {% for product in products %}
+                                            <li>
+                                                <div class="product-card" style="display: flex; align-items: flex-start; gap: 20px; padding: 10px; border: 1px solid #ccc; margin-bottom: 20px;">
+
+                                                    <div class="product-image">
+                                                        <img src="{{ url_for('static', filename='image/' ~ product.productId ~ '.jpeg') }}"
+                                                             alt="{{ product.productName }}"
+                                                             style="width: 150px; height: 150px; object-fit: contain;">
+                                                    </div>
+
+                                                    <div class="product-info">
+                                                        <strong>{{ product.productName }}</strong><br>
+                                                        <small style="color: var(--text-light);">{{ product.description }}</small><br>
+                                                        <strong>Price:</strong> ${{ "%.2f"|format(product.price) }}<br>
+                                                        <strong>Stock:</strong> {{ product.stock }}<br>
+                                                        <strong>Category:</strong> {{ product.category }}<br><br>
+                                                        <button onclick="addToCart(
+                                                            {{ product.productId }},
+                                                            '{{ product.productName }}',
+                                                            {{ product.price }},
+                                                            '{{ brand }}',
+                                                            '{{ product.model }}'
+                                                        )">Add to Cart</button>
+                                                    </div>
+
+                                                </div>
+
+                                            </li>
+                                       {% endfor %}
+                                    </ul>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="cart">
+            <h2>Cart</h2>
+            <ul id="cart-items">
+                <li id="empty-cart">No items in cart.</li>
+            </ul>
+            <p><strong>Total:</strong> $<span id="total-price">0.00</span></p>
+                <button class="checkout" onclick="checkout()">Checkout</button>
+        </div>
+    </div>
+
+    <div id="ordersModal" class="modal">
+      <div class="modal-content orders-box">
+        <span class="close-btn" onclick="closeOrdersModal()">&times;</span>
+        <h2>Your Orders</h2>
+
+        {% if orders %}
+          <ul class="order-list">
+            {% for order in orders %}
+              {% if order.status != 'cancelled' %}
+                <li class="order-card">
+                  <div class="order-header">
+                    <strong>Order #{{ order.orderId }}</strong>
+                    <span class="order-status status-{{ order.status }}">{{ order.status | capitalize }}</span>
+                  </div>
+                  <p>Total: ${{ "%.2f"|format(order.totalPrice) }}</p>
+                  <p>Date: {{ order.date }}</p>
+                  <p>Payment: {{ order.payMethod or "Unpaid" }}</p>
+
+                  <div class="order-products">
+                    <strong>Products:</strong>
+                    <ul>
+                      {% for product in order.productList %}
+                        <li>{{ product.productName }} — ${{ "%.2f"|format(product.price) }}</li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+
+                  <div class="order-actions">
+                    {% if order.status in ['paid', 'processed'] %}
+                      <form method="GET" action="{{ url_for('download_receipt', order_id=order.orderId) }}">
+                        <button type="submit" class="btn-primary">Download Receipt</button>
+                      </form>
+                    {% else %}
+                      <form id="paymentForm_{{ order.orderId }}" class="payment-form">
+                        <select name="payment_method" id="paymentMethod_{{ order.orderId }}" required>
+                          <option value="">Choose Payment</option>
+                          <option value="wechat">WeChat Pay</option>
+                          <option value="alipay">Alipay</option>
+                          <option value="credit_card">Credit Card</option>
+                        </select>
+                        <button type="button" onclick="showPaymentModal('{{ order.orderId }}')" class="btn-primary">Pay Now</button>
+                      </form>
+                      <form method="POST" action="{{ url_for('cancel_order', order_id=order.orderId) }}">
+                        <button type="submit" class="btn-danger" onclick="return confirm('Cancel this order?')">Cancel</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="no-orders">You have no orders yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+
+    <div id="paymentModal" class="modal">
+        <div class="payment-box">
+            <span class="close-btn" onclick="togglePaymentModal()">&times;</span>
+            <h2><span id="modalMethod"></span> Payment</h2>
+            <p><strong>Order ID:</strong> <span id="modalOrderId"></span></p>
+            <p>Scan the QR code below to complete your payment:</p>
+            <img id="qrImage" src="" alt="QR Code for {{ method }} Payment" />
+
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <form action="{{ url_for('payment_result') }}" method="get">
+                    <input type="hidden" name="order_id" id="modalOrderIdInput">
+                    <input type="hidden" name="status" value="success">
+                    <input type="hidden" name="method" id="modalMethodInput">
+                    <button onclick="handlePaymentResult('success')" class="btn-primary">I made payment already</button>
+                </form>
+
+                <form action="{{ url_for('payment_result') }}" method="get">
+                    <input type="hidden" name="order_id" id="modalOrderIdInput2">
+                    <input type="hidden" name="status" value="failure">
+                    <button onclick="handlePaymentResult('failure')" class="btn-danger">Cancel Payment</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+        <div id="profileModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="toggleProfileModal()">&times;</span>
+                <h2>User Profile</h2>
+                <p><strong>Name:</strong> {{ user.name }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Role:</strong> {{ user.role }}</p>
+
+                <div class="action-links">
+                    <a href="javascript:void(0);" onclick="togglePasswordResetForm()">Reset Password</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </div>
+
+                <div class="reset-password-form" id="reset-password-form">
+                    <form method="POST" action="{{ url_for('index') }}">
+                        <label for="new_password">New Password:</label>
+                        <input type="password" name="new_password" required>
+                        <input type="hidden" name="userId" value="{{ user.userId }}">
+                        <button type="submit">Reset Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+    <script>
+        function toggleList(button) {
+            const list = button.nextElementSibling;
+            const arrow = button.querySelector('.arrow');
+            const isVisible = list.style.display === "block";
+
+            list.style.display = isVisible ? "none" : "block";
+            arrow.textContent = isVisible ? "▶" : "▼";
+        }
+
+        let cart = [];
+        let total = 0;
+
+        window.onload = function () {
+            const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
+            const savedTotal = parseFloat(localStorage.getItem("total")) || 0;
+
+            cart = savedCart;
+            total = savedTotal;
+
+            const cartList = document.getElementById("cart-items");
+            cartList.innerHTML = "";
+
+            if (cart.length === 0) {
+                const empty = document.createElement("li");
+                empty.id = "empty-cart";
+                empty.textContent = "No items in cart.";
+                cartList.appendChild(empty);
+            } else {
+                cart.forEach(item => {
+                    addItemToDOM(item);
+                });
+            }
+
+            updateTotal();
+        };
+
+        function addToCart(id, name, price, brand, model) {
+            const emptyMsg = document.getElementById("empty-cart");
+            if (emptyMsg) {
+                emptyMsg.remove();
+            }
+
+            const item = { id, name, price, brand, model };
+            cart.push(item);
+            localStorage.setItem("cart", JSON.stringify(cart));
+
+            addItemToDOM(item);
+
+            total += price;
+            updateTotal();
+            localStorage.setItem("total", total.toFixed(2));
+        }
+
+        function addItemToDOM(item) {
+            const li = document.createElement("li");
+            li.setAttribute("data-id", item.id);
+            li.innerHTML = `
+                <strong>${item.name}</strong> - ${item.brand} - ${item.model} - $${item.price.toFixed(2)}
+                <button onclick="removeFromCart(${item.id}, ${item.price})" style="margin-top: 5px;">Delete</button>
+            `;
+            document.getElementById("cart-items").appendChild(li);
+        }
+
+        function removeFromCart(id, price) {
+            const item = document.querySelector(`[data-id='${id}']`);
+            if (item) item.remove();
+
+            cart = cart.filter(p => p.id !== id);
+            total -= price;
+            updateTotal();
+
+            localStorage.setItem("cart", JSON.stringify(cart));
+            localStorage.setItem("total", total.toFixed(2));
+
+            if (cart.length === 0) {
+                const empty = document.createElement("li");
+                empty.id = "empty-cart";
+                empty.textContent = "No items in cart.";
+                document.getElementById("cart-items").appendChild(empty);
+            }
+        }
+
+        function updateTotal() {
+            document.getElementById("total-price").textContent = total.toFixed(2);
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert("Cart is empty.");
+                return;
+            }
+
+            const productNames = cart.map(item => item.name); // optional
+            const payload = {
+                product_names: productNames,
+                cart: cart.map(item => ({ id: item.id }))
+            };
+
+            fetch("/checkout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload)
+            })
+                        .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Checkout failed.");
+                }
+            })
+            .then(data => {
+                alert("Order placed successfully!");
+                // Clear cart data
+                cart = [];
+                total = 0;
+                localStorage.removeItem("cart");
+                localStorage.removeItem("total");
+                document.getElementById("cart-items").innerHTML = "<li id='empty-cart'>No items in cart.</li>";
+                updateTotal();
+
+                const ordersModal = document.getElementById("ordersModal");
+                if (ordersModal) {
+                    ordersModal.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert("There was an issue placing your order. Please try again.");
+            });
+        }
+
+
+        document.getElementById('viewOrdersBtn').onclick = function() {
+            document.getElementById('ordersModal').style.display = 'block';
+        };
+
+        document.querySelector('.close-btn').onclick = function() {
+            document.getElementById('ordersModal').style.display = 'none';
+        };
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('ordersModal')) {
+                document.getElementById('ordersModal').style.display = 'none';
+            }
+        };
+
+        function toggleProfileModal() {
+            var modal = document.getElementById("profileModal");
+            modal.style.display = (modal.style.display === "block") ? "none" : "block";
+        }
+
+        function togglePasswordResetForm() {
+            var form = document.getElementById('reset-password-form');
+            form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+        }
+
+        window.onclick = function(event) {
+            var modal = document.getElementById("profileModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                alert("{{ message }}");
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        function showPaymentModal(orderId) {
+            console.log("showPaymentModal called for orderId:", orderId);
+            const methodSelect = document.getElementById(`paymentMethod_${orderId}`);
+            const selectedMethod = methodSelect.value;
+
+            if (!selectedMethod) {
+                alert("Please select a payment method.");
+                return;
+            }
+
+            let methodLabel = '';
+            let qrSrc = '';
+
+            if (selectedMethod === 'wechat') {
+                methodLabel = 'WeChat Pay';
+                qrSrc = '/static/qr_wechat.jpg';
+            } else if (selectedMethod === 'alipay') {
+                methodLabel = 'Alipay';
+                qrSrc = '/static/qr_alipay.png';
+            } else if (selectedMethod === 'credit_card') {
+                methodLabel = 'Credit Card';
+                qrSrc = '/static/qr_card.jpg';
+            } else {
+                alert("Invalid payment method.");
+                return;
+            }
+
+            // Set modal content
+            document.getElementById("modalMethod").textContent = methodLabel;
+            document.getElementById("modalOrderId").textContent = orderId;
+            document.getElementById("qrImage").src = qrSrc;
+
+            document.getElementById("modalMethodInput").value = selectedMethod;
+            document.getElementById("modalOrderIdInput").value = orderId;
+            document.getElementById("modalOrderIdInput2").value = orderId;
+
+            // Show modal
+            document.getElementById("paymentModal").style.display = "flex";
+        }
+
+        function togglePaymentModal() {
+            const modal = document.getElementById("paymentModal");
+            modal.style.display = (modal.style.display === "none" || modal.style.display === "") ? "flex" : "none";
+        }
+
+        function handlePaymentResult(status) {
+            const orderId = document.getElementById("modalOrderId").textContent;
+            const method = document.getElementById("modalMethod").textContent;
+
+            // Optionally send to server (if needed for logging)
+            fetch(`/payment_result?order_id=${orderId}&status=${status}&method=${method}`, {
+                method: 'GET'
+            })
+            .then(response => response.json())  // backend must return JSON if you want to process it
+            .then(data => {
+                alert(data.message || `Payment ${status === 'success' ? 'completed' : 'cancelled'} for Order #${orderId}.`);
+                togglePaymentModal();
+                // Optionally reload page to refresh order status:
+                location.reload();
+            })
+            .catch(error => {
+                alert("Something went wrong with the payment result.");
+                console.error(error);
+            });
+        }
+
+        function filterProducts() {
+            const input = document.getElementById("productSearch").value.toLowerCase();
+            const productCards = document.querySelectorAll(".product-card");
+
+            productCards.forEach(card => {
+                const productText = card.innerText.toLowerCase();
+                if (productText.includes(input)) {
+                    card.parentElement.style.display = ""; // show
+                } else {
+                    card.parentElement.style.display = "none"; // hide
+                }
+            });
+
+            // Optional: Automatically expand nested lists to reveal matching items
+            document.querySelectorAll('.nested-list').forEach(ul => {
+                const visibleProducts = ul.querySelectorAll('li:not([style*="display: none"])');
+                ul.parentElement.style.display = visibleProducts.length ? "" : "none";
+            });
+        }
+
+    </script>
+</body>
+</html>

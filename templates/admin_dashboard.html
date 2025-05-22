@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+         :root {
+            --primary-color: #007BFF;
+            --secondary-color: #f9f9f9;
+            --border-color: #e0e0e0;
+            --text-dark: #333;
+            --text-light: #666;
+            --background: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #f4f6f8;
+            color: var(--text-dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .background-wrapper {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100vh;
+          background-image: url("static/background.jpg");
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+          z-index: -2;
+        }
+
+        .background-fade {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 200px;
+          background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, #f4f6f8 100%);
+          z-index: -1;
+        }
+
+        h1 {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1em 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .section-box {
+            background-color: var(--background);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .section-box h2 {
+            margin-top: 0;
+        }
+
+        .form-box input,
+        .form-box select,
+        .form-box button {
+            padding: 10px;
+            margin: 8px 10px 8px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .form-box button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .form-box button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 6px 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .pagination a:hover {
+            background-color: #0056b3;
+        }
+
+        .action-form {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .top-right.user-box {
+          position: absolute;
+          top: 10px;
+          right: 20px;
+          font-size: 0.9em;
+          text-align: right;
+          z-index: 10;
+        }
+
+        .top-right.user-box a,
+        .top-right.user-box button {
+          color: var(--primary-color);
+          text-decoration: none;
+          margin-left: 10px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 0.9em;
+        }
+
+        .top-right.user-box a:hover,
+        .top-right.user-box button:hover {
+          text-decoration: underline;
+        }
+
+        .user-box {
+            background-color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            min-width: 220px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .user-box p {
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+        }
+
+        .user-box a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-right: 12px;
+        }
+
+        .user-box a.logout-link {
+            color: #dc3545;
+        }
+
+        .user-box a:hover {
+            text-decoration: underline;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="background-wrapper">
+        <div class="background-fade"></div>
+    </div>
+    <div class="top-right user-box">
+      {% if session.username %}
+        <p><strong>Welcome,</strong> {{ session.username }}!</p>
+        <p>
+            <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+        </p>
+      {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+      {% endif %}
+    </div>
+
+    <h1>Admin Dashboard</h1>
+
+    <div class="container">
+        <div class="section-box">
+            <h2>Users</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.userId }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>
+                            {% if user.role == 'customer' %}
+                                <form action="{{ url_for('grant_role', user_id=user.userId) }}" method="post" style="display:inline;">
+                                    <button type="submit">Grant OP</button>
+                                </form>
+                            {% elif user.role == 'operating specialist' %}
+                                <form action="{{ url_for('deprive_role', user_id=user.userId) }}" method="post" style="display:inline;">
+                                    <button type="submit">Deprive OP</button>
+                                </form>
+                            {% else %}
+                            {% endif %}
+                            <form class="action-form" method="POST" action="{{ url_for('delete_user', user_id=user.userId) }}" style="display:inline;">
+                                <button type="submit">Delete</button>
+                            </form>
+                            <form class="action-form" method="POST" action="{{ url_for('update_user', user_id=user.userId) }}" style="display:inline;">
+                                <input type="text" name="name" placeholder="New Name">
+                                <input type="text" name="email" placeholder="New Email">
+                                <button type="submit">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                {% if page > 1 %}
+                    <a href="{{ url_for('admin_dashboard', page=page-1) }}">Previous</a>
+                {% endif %}
+
+                <span>Page {{ page }} of {{ total_pages }}</span>
+
+                {% if page < total_pages %}
+                    <a href="{{ url_for('admin_dashboard', page=page+1) }}">Next</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Add User -->
+        <div class="section-box form-box">
+            <h2>Add User</h2>
+            <form method="POST" action="{{ url_for('add_user') }}">
+                <input type="text" name="name" placeholder="User Name" required>
+                <input type="text" name="email" placeholder="Email" required>
+                <input type="text" name="password" placeholder="Password">
+                <input type="text" name="role" placeholder="Role">
+                <button type="submit">Add User</button>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+</html>

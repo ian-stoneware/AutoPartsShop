@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Operating Specialist Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #007BFF;
+            --secondary-color: #f9f9f9;
+            --border-color: #e0e0e0;
+            --text-dark: #333;
+            --text-light: #666;
+            --background: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #f4f6f8;
+            color: var(--text-dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .background-wrapper {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100vh;
+          background-image: url("static/background.jpg");
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+          z-index: -2;
+        }
+
+        .background-fade {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 200px;
+          background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, #f4f6f8 100%);
+          z-index: -1;
+        }
+
+        h1 {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1em 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .section-box {
+            background-color: var(--background);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .section-box h2 {
+            margin-top: 0;
+        }
+
+        .form-box input,
+        .form-box select,
+        .form-box button {
+            padding: 10px;
+            margin: 8px 10px 8px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .form-box button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .form-box button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 6px 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .pagination a:hover {
+            background-color: #0056b3;
+        }
+
+        .action-form {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .top-right.user-box {
+          position: absolute;
+          top: 10px;
+          right: 20px;
+          font-size: 0.9em;
+          text-align: right;
+          z-index: 10;
+        }
+
+        .top-right.user-box a,
+        .top-right.user-box button {
+          color: var(--primary-color);
+          text-decoration: none;
+          margin-left: 10px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 0.9em;
+        }
+
+        .top-right.user-box a:hover,
+        .top-right.user-box button:hover {
+          text-decoration: underline;
+        }
+
+        .user-box {
+            background-color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            min-width: 220px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .user-box p {
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+        }
+
+        .user-box a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-right: 12px;
+        }
+
+        .user-box a.logout-link {
+            color: #dc3545;
+        }
+
+        .user-box a:hover {
+            text-decoration: underline;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+        }
+
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: #aaa;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+         /* Reset password form */
+          #reset-password-form {
+            display: none; /* hidden by default, toggled with JS */
+            margin-top: 20px;
+          }
+
+          #reset-password-form form {
+            display: flex;
+            flex-direction: column;
+          }
+
+          #reset-password-form label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+          }
+
+          #reset-password-form input[type="password"] {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+          }
+          #reset-password-form input[type="password"]:focus {
+            outline: none;
+            border-color: #007bff;
+          }
+
+          #reset-password-form button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 0;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+          }
+          #reset-password-form button:hover {
+            background-color: #0056b3;
+          }
+
+          .action-links {
+            display: flex;
+          gap: 20px;
+          justify-content: flex-start;
+          margin: 25px 0 15px 0;
+        }
+        .action-links a {
+            color: #007bff;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .action-links a:hover {
+            background-color: #e6f0ff;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="background-wrapper">
+        <div class="background-fade"></div>
+    </div>
+<div class="top-right user-box">
+    {% if session.username %}
+        <p><strong>Welcome,</strong> {{ session.username }}!</p>
+        <p>
+             <button onclick="toggleProfileModal()">View Profile</button>
+            <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+        </p>
+    {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+</div>
+
+<h1>Operating Specialist Dashboard</h1>
+
+<div class="container">
+    <!-- All Products -->
+    <div class="section-box">
+        <h2>All Products</h2>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Model</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.productName }}</td>
+                <td>{{ product.brand }}</td>
+                <td>{{ product.model }}</td>
+                <td>${{ product.price }}</td>
+                <td>{{ product.stock }}</td>
+                <td>
+                    <form class="action-form" method="POST" action="{{ url_for('delete_product', product_id=product.productId) }}">
+                        <button type="submit">Delete</button>
+                    </form>
+                    <form class="action-form" method="POST" action="{{ url_for('update_product', product_id=product.productId) }}">
+                        <input type="text" name="price" placeholder="New Price">
+                        <input type="text" name="stock" placeholder="New Stock">
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Products Pagination -->
+        <div class="pagination">
+            {% if product_page > 1 %}
+                <a href="{{ url_for('ops_dashboard', product_page=product_page-1, order_page=order_page) }}">Previous</a>
+            {% endif %}
+            <span>Page {{ product_page }} of {{ product_total_pages }}</span>
+            {% if product_page < product_total_pages %}
+                <a href="{{ url_for('ops_dashboard', product_page=product_page+1, order_page=order_page) }}">Next</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Add Product -->
+    <div class="section-box form-box">
+        <h2>Add Product</h2>
+        <form method="POST" action="{{ url_for('add_product') }}">
+            <input type="text" name="productName" placeholder="Product Name" required>
+            <input type="text" name="description" placeholder="Description" required>
+            <input type="number" step="0.01" name="price" placeholder="Price" required>
+            <input type="number" name="stock" placeholder="Stock" required>
+            <input type="text" name="category" placeholder="Category">
+            <input type="text" name="brand" placeholder="Brand">
+            <input type="text" name="model" placeholder="Model">
+            <button type="submit">Add Product</button>
+        </form>
+    </div>
+
+    <!-- All Orders -->
+    <div class="section-box">
+        <h2>All Orders</h2>
+        <table>
+            <tr>
+                <th>Order ID</th>
+                <th>User ID</th>
+                <th>Total Price</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.orderId }}</td>
+                <td>{{ order.userId }}</td>
+                <td>${{ order.totalPrice }}</td>
+                <td>{{ order.status }}</td>
+                <td>{{ order.date }}</td>
+                <td>
+                    {% if order.status != 'processed' and order.status != 'cancelled' %}
+                    <form method="POST" action="{{ url_for('process_order', order_id=order.orderId) }}">
+                        <button type="submit">Mark as Processed</button>
+                    </form>
+                    {% else %}
+                    No action
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Orders Pagination -->
+        <div class="pagination">
+            {% if order_page > 1 %}
+                <a href="{{ url_for('ops_dashboard', product_page=product_page, order_page=order_page-1) }}">Previous</a>
+            {% endif %}
+            <span>Page {{ order_page }} of {{ order_total_pages }}</span>
+            {% if order_page < order_total_pages %}
+                <a href="{{ url_for('ops_dashboard', product_page=product_page, order_page=order_page+1) }}">Next</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleProfileModal()">&times;</span>
+            <h2>User Profile</h2>
+            <p><strong>Name:</strong> {{ user.name }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Role:</strong> {{ user.role }}</p>
+
+            <div class="action-links">
+                <a href="javascript:void(0);" onclick="togglePasswordResetForm()">Reset Password</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+
+            <div class="reset-password-form" id="reset-password-form" style="display:none;">
+                <form method="POST" action="{{ url_for('index') }}">
+                    <label for="new_password">New Password:</label>
+                    <input type="password" name="new_password" required>
+                    <input type="hidden" name="userId" value="{{ user.userId }}">
+                    <button type="submit">Reset Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function toggleProfileModal() {
+        const modal = document.getElementById("profileModal");
+        modal.style.display = (modal.style.display === "block") ? "none" : "block";
+    }
+
+    function togglePasswordResetForm() {
+        const form = document.getElementById("reset-password-form");
+        form.style.display = (form.style.display === "block") ? "none" : "block";
+    }
+
+    // Optional: Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById("profileModal");
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>
