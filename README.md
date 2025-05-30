@@ -22,11 +22,23 @@ Auto Parts Shop Website
 
 ## ⚙️ Installation
 
-```bash
+# Clone the repository
 git clone https://github.com/ian-stoneware/AutoPartsShop.git
 cd AutoPartsShop
-python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
 
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+
+# Set Flask environment variables (Unix/macOS)
+export FLASK_APP=index.py
+export FLASK_ENV=development
+
+# For Windows (CMD)
+# set FLASK_APP=index.py
+# set FLASK_ENV=development
+
+# Run the Flask development server
 flask run
+
 
