@@ -22,9 +22,8 @@ Auto Parts Shop Website
 
 ## ⚙️ Installation
 
-### 1. Clone the Repository
-
 ```bash
+### Clone the Repository
 git clone https://github.com/ian-stoneware/AutoPartsShop.git
 cd AutoPartsShop
 
