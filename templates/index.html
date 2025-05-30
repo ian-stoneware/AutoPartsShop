@@ -249,12 +249,12 @@
             border: 1px solid #888;
             border-radius: 10px;
             width: 90%;
-            max-width: 800px;
+            max-width: 400px;
             position: relative;
         }
 
         .modal-content.orders-box {
-          max-width: 800px;
+          max-width: 400px;
           margin: 5% auto;
           padding: 30px;
           background: #fff;
@@ -274,6 +274,13 @@
           list-style: none;
           padding: 0;
           margin: 0;
+        }
+
+        .orders-section {
+          background-color: var(--background);
+          border-radius: 8px;
+          padding: 20px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
         .order-card {
@@ -509,7 +516,7 @@
           <p><strong>Welcome,</strong> {{ session.username }}!</p>
           <div class="user-action-group">
             <button onclick="toggleProfileModal()">View Profile</button>
-            <button id="viewOrdersBtn">View Orders</button>
+            <button onclick="toggleOrders()">View Orders</button>
             <a href="{{ url_for('logout') }}" class="btn-link">Logout</a>
           </div>
         {% else %}
@@ -593,65 +600,63 @@
             </ul>
             <p><strong>Total:</strong> $<span id="total-price">0.00</span></p>
                 <button class="checkout" onclick="checkout()">Checkout</button>
-        </div>
-    </div>
 
-    <div id="ordersModal" class="modal">
-      <div class="modal-content orders-box">
-        <span class="close-btn" onclick="closeOrdersModal()">&times;</span>
-        <h2>Your Orders</h2>
+            <div id="ordersSection" class="orders-section" style="display: none; margin-top: 20px;">
+              <h2>Your Orders</h2>
+              {% if orders %}
+                <ul class="order-list">
+                  {% for order in orders %}
+                    {% if order.status != 'cancelled' %}
+                      <li class="order-card">
+                        <div class="order-header">
+                          <strong>Order #{{ order.orderId }}</strong>
+                          <span class="order-status status-{{ order.status }}">{{ order.status | capitalize }}</span>
+                        </div>
+                        <p>Total: ${{ "%.2f"|format(order.totalPrice) }}</p>
+                        <p>Date: {{ order.date }}</p>
+                        <p>Payment: {{ order.payMethod or "Unpaid" }}</p>
 
-        {% if orders %}
-          <ul class="order-list">
-            {% for order in orders %}
-              {% if order.status != 'cancelled' %}
-                <li class="order-card">
-                  <div class="order-header">
-                    <strong>Order #{{ order.orderId }}</strong>
-                    <span class="order-status status-{{ order.status }}">{{ order.status | capitalize }}</span>
-                  </div>
-                  <p>Total: ${{ "%.2f"|format(order.totalPrice) }}</p>
-                  <p>Date: {{ order.date }}</p>
-                  <p>Payment: {{ order.payMethod or "Unpaid" }}</p>
+                        <div class="order-products">
+                          <strong>Products:</strong>
+                          <ul>
+                            {% for product in order.productList %}
+                              <li>{{ product.productName }} — ${{ "%.2f"|format(product.price) }}</li>
+                            {% endfor %}
+                          </ul>
+                        </div>
 
-                  <div class="order-products">
-                    <strong>Products:</strong>
-                    <ul>
-                      {% for product in order.productList %}
-                        <li>{{ product.productName }} — ${{ "%.2f"|format(product.price) }}</li>
-                      {% endfor %}
-                    </ul>
-                  </div>
-
-                  <div class="order-actions">
-                    {% if order.status in ['paid', 'processed'] %}
-                      <form method="GET" action="{{ url_for('download_receipt', order_id=order.orderId) }}">
-                        <button type="submit" class="btn-primary">Download Receipt</button>
-                      </form>
-                    {% else %}
-                      <form id="paymentForm_{{ order.orderId }}" class="payment-form">
-                        <select name="payment_method" id="paymentMethod_{{ order.orderId }}" required>
-                          <option value="">Choose Payment</option>
-                          <option value="wechat">WeChat Pay</option>
-                          <option value="alipay">Alipay</option>
-                          <option value="credit_card">Credit Card</option>
-                        </select>
-                        <button type="button" onclick="showPaymentModal('{{ order.orderId }}')" class="btn-primary">Pay Now</button>
-                      </form>
-                      <form method="POST" action="{{ url_for('cancel_order', order_id=order.orderId) }}">
-                        <button type="submit" class="btn-danger" onclick="return confirm('Cancel this order?')">Cancel</button>
-                      </form>
+                        <div class="order-actions">
+                          {% if order.status in ['paid', 'processed'] %}
+                            <form method="GET" action="{{ url_for('download_receipt', order_id=order.orderId) }}">
+                              <button type="submit" class="btn-primary">Download Receipt</button>
+                            </form>
+                          {% else %}
+                            <form id="paymentForm_{{ order.orderId }}" class="payment-form">
+                              <select name="payment_method" id="paymentMethod_{{ order.orderId }}" required>
+                                <option value="">Choose Payment</option>
+                                <option value="wechat">WeChat Pay</option>
+                                <option value="alipay">Alipay</option>
+                                <option value="credit_card">Credit Card</option>
+                              </select>
+                              <button type="button" onclick="showPaymentModal('{{ order.orderId }}')" class="btn-primary">Pay Now</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('cancel_order', order_id=order.orderId) }}">
+                              <button type="submit" class="btn-danger" onclick="return confirm('Cancel this order?')">Cancel</button>
+                            </form>
+                          {% endif %}
+                        </div>
+                      </li>
                     {% endif %}
-                  </div>
-                </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="no-orders">You have no orders yet.</p>
               {% endif %}
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="no-orders">You have no orders yet.</p>
-        {% endif %}
-      </div>
+            </div>
+        </div>
+
     </div>
+
 
 
     <div id="paymentModal" class="modal">
@@ -828,10 +833,11 @@
                 document.getElementById("cart-items").innerHTML = "<li id='empty-cart'>No items in cart.</li>";
                 updateTotal();
 
-                const ordersModal = document.getElementById("ordersModal");
-                if (ordersModal) {
-                    ordersModal.style.display = "block";
+                const ordersSection = document.getElementById("ordersSection");
+                if (ordersSection) {
+                    ordersSection.style.display = "block";
                 }
+
             })
             .catch(error => {
                 console.error(error);
@@ -840,19 +846,10 @@
         }
 
 
-        document.getElementById('viewOrdersBtn').onclick = function() {
-            document.getElementById('ordersModal').style.display = 'block';
-        };
-
-        document.querySelector('.close-btn').onclick = function() {
-            document.getElementById('ordersModal').style.display = 'none';
-        };
-
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('ordersModal')) {
-                document.getElementById('ordersModal').style.display = 'none';
-            }
-        };
+        function toggleOrders() {
+            const ordersSection = document.getElementById('ordersSection');
+            ordersSection.style.display = ordersSection.style.display === 'none' ? 'block' : 'none';
+          }
 
         function toggleProfileModal() {
             var modal = document.getElementById("profileModal");
